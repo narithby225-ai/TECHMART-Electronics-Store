@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Package, TrendingUp, Users, AlertCircle, CheckCircle, Clock, Box, Plus, Truck, RefreshCw } from 'lucide-react';
+import { Package, TrendingUp, Users, AlertCircle, CheckCircle, Clock, Box, Plus, Truck, RefreshCw, DollarSign, FileText, TrendingDown, Receipt, BarChart3 } from 'lucide-react';
 import AddProduct from './AddProduct';
 import DeliveryTracker from './DeliveryTracker';
 
 export default function ManagerDashboard({ user, darkMode, onAddProduct, orders = [], onUpdateOrderStatus }) {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview'); // overview, income, invoices, inventory
+  
   const stats = [
     { label: 'Pending Orders', value: orders.filter(o => o.deliveryStatus === 'preparing').length.toString(), icon: Clock, color: 'amber', change: '+12%' },
     { label: 'Out for Delivery', value: orders.filter(o => o.deliveryStatus === 'out_for_delivery').length.toString(), icon: Truck, color: 'blue', change: '+8%' },
@@ -79,8 +81,8 @@ export default function ManagerDashboard({ user, darkMode, onAddProduct, orders 
       <div className={`p-6 rounded-2xl border ${darkMode ? 'bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-purple-500/30' : 'bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200'}`}>
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2">Manager Dashboard - {user.name} 👨‍💼</h2>
-            <p className={darkMode ? 'text-slate-300' : 'text-slate-600'}>Manage orders, inventory, and customer requests</p>
+            <h2 className="text-2xl font-bold mb-2">Store Manager Dashboard - {user.name} 👨‍💼</h2>
+            <p className={darkMode ? 'text-slate-300' : 'text-slate-600'}>Manage orders, inventory, view income/expenses and customer invoices</p>
           </div>
           <button
             onClick={() => setShowAddProduct(true)}
@@ -91,6 +93,57 @@ export default function ManagerDashboard({ user, darkMode, onAddProduct, orders 
           </button>
         </div>
       </div>
+
+      {/* Tab Navigation */}
+      <div className={`flex gap-2 p-2 rounded-xl ${darkMode ? 'bg-slate-800/50' : 'bg-slate-100'}`}>
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={`flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2 ${
+            activeTab === 'overview'
+              ? 'bg-gradient-to-r from-purple-500 to-blue-600 text-white shadow-lg'
+              : darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-slate-600 hover:bg-white'
+          }`}
+        >
+          <BarChart3 className="w-4 h-4" />
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('income')}
+          className={`flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2 ${
+            activeTab === 'income'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
+              : darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-slate-600 hover:bg-white'
+          }`}
+        >
+          <DollarSign className="w-4 h-4" />
+          Income/Expense
+        </button>
+        <button
+          onClick={() => setActiveTab('invoices')}
+          className={`flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2 ${
+            activeTab === 'invoices'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
+              : darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-slate-600 hover:bg-white'
+          }`}
+        >
+          <Receipt className="w-4 h-4" />
+          Customer Invoices
+        </button>
+        <button
+          onClick={() => setActiveTab('inventory')}
+          className={`flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition flex items-center justify-center gap-2 ${
+            activeTab === 'inventory'
+              ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg'
+              : darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-slate-600 hover:bg-white'
+          }`}
+        >
+          <Box className="w-4 h-4" />
+          Inventory
+        </button>
+      </div>
+
+      {/* Overview Tab */}
+      {activeTab === 'overview' && (<>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -278,6 +331,257 @@ export default function ManagerDashboard({ user, darkMode, onAddProduct, orders 
           <div className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>Track deliveries</div>
         </button>
       </div>
+      </>)}
+
+      {/* Income/Expense Tab */}
+      {activeTab === 'income' && (
+        <div className="space-y-6">
+          {/* Financial Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className={`p-6 rounded-xl border ${darkMode ? 'bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border-emerald-500/30' : 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200'}`}>
+              <div className="flex items-center justify-between mb-4">
+                <TrendingUp className="w-10 h-10 text-emerald-400" />
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400">+12.5%</span>
+              </div>
+              <div className="text-3xl font-black text-emerald-400 mb-2">$45,280.00</div>
+              <div className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Total Income (This Month)</div>
+            </div>
+
+            <div className={`p-6 rounded-xl border ${darkMode ? 'bg-gradient-to-br from-rose-500/10 to-pink-500/10 border-rose-500/30' : 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-200'}`}>
+              <div className="flex items-center justify-between mb-4">
+                <TrendingDown className="w-10 h-10 text-rose-400" />
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-rose-500/20 text-rose-400">+5.2%</span>
+              </div>
+              <div className="text-3xl font-black text-rose-400 mb-2">$12,430.00</div>
+              <div className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Total Expenses (This Month)</div>
+            </div>
+
+            <div className={`p-6 rounded-xl border ${darkMode ? 'bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/30' : 'bg-gradient-to-br from-cyan-50 to-blue-50 border-cyan-200'}`}>
+              <div className="flex items-center justify-between mb-4">
+                <DollarSign className="w-10 h-10 text-cyan-400" />
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400">+18.3%</span>
+              </div>
+              <div className="text-3xl font-black text-cyan-400 mb-2">$32,850.00</div>
+              <div className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Net Profit (This Month)</div>
+            </div>
+          </div>
+
+          {/* Income/Expense Records */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Income Records */}
+            <div className={`p-6 rounded-2xl border ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-emerald-400" />
+                Recent Income
+              </h3>
+              <div className="space-y-3">
+                {[
+                  { id: 'INC-001', type: 'Product Sales', amount: 2850.00, date: '2026-11-07', customer: 'John Customer' },
+                  { id: 'INC-002', type: 'Product Sales', amount: 1499.99, date: '2026-11-07', customer: 'Sarah Smith' },
+                  { id: 'INC-003', type: 'Product Sales', amount: 3250.50, date: '2026-11-06', customer: 'Mike Johnson' },
+                  { id: 'INC-004', type: 'Product Sales', amount: 899.99, date: '2026-11-06', customer: 'Emily Davis' },
+                ].map((record) => (
+                  <div key={record.id} className={`p-4 rounded-lg border ${darkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <div className="font-semibold text-emerald-400">{record.id}</div>
+                        <div className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                          {record.type} • {record.customer}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-emerald-400">+${record.amount.toFixed(2)}</div>
+                        <div className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>{record.date}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Expense Records */}
+            <div className={`p-6 rounded-2xl border ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <TrendingDown className="w-5 h-5 text-rose-400" />
+                Recent Expenses
+              </h3>
+              <div className="space-y-3">
+                {[
+                  { id: 'EXP-001', type: 'Shipping Costs', amount: 450.00, date: '2026-11-07', note: 'Courier fees' },
+                  { id: 'EXP-002', type: 'Packaging', amount: 280.50, date: '2026-11-07', note: 'Boxes & materials' },
+                  { id: 'EXP-003', type: 'Utilities', amount: 650.00, date: '2026-11-06', note: 'Store utilities' },
+                  { id: 'EXP-004', type: 'Maintenance', amount: 320.00, date: '2026-11-06', note: 'Equipment repair' },
+                ].map((record) => (
+                  <div key={record.id} className={`p-4 rounded-lg border ${darkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <div className="font-semibold text-rose-400">{record.id}</div>
+                        <div className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                          {record.type} • {record.note}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-rose-400">-${record.amount.toFixed(2)}</div>
+                        <div className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>{record.date}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Note about inventory purchase */}
+          <div className={`p-4 rounded-xl border ${darkMode ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-200'}`}>
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <div className="font-semibold text-amber-400 mb-1">Permission Note</div>
+                <div className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  As a Store Manager, you can view income/expense records but cannot purchase new inventory. Contact the Store Owner for inventory purchases.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Customer Invoices Tab */}
+      {activeTab === 'invoices' && (
+        <div className="space-y-6">
+          <div className={`p-6 rounded-2xl border ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-cyan-400" />
+              Customer Purchase Invoices
+            </h3>
+            <div className="space-y-3">
+              {orders.map((order) => (
+                <div key={order.id} className={`p-5 rounded-xl border ${darkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-bold text-lg">Invoice #{order.id}</span>
+                        <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                          order.deliveryStatus === 'delivered' ? 'bg-emerald-500/20 text-emerald-400' :
+                          order.deliveryStatus === 'out_for_delivery' ? 'bg-blue-500/20 text-blue-400' :
+                          'bg-amber-500/20 text-amber-400'
+                        }`}>
+                          {order.deliveryStatus.replace('_', ' ').toUpperCase()}
+                        </span>
+                      </div>
+                      <div className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                        Date: {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </div>
+                      <div className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                        Customer: John Customer • customer@demo.com
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-black text-cyan-400">${order.total.toFixed(2)}</div>
+                      <button className="mt-2 px-4 py-1.5 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 rounded-lg text-xs font-semibold transition">
+                        View Full Invoice
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className={`pt-4 border-t ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                    <div className="text-sm font-semibold mb-3">Order Items:</div>
+                    <div className="space-y-2">
+                      {order.items.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-sm">
+                          <span className={darkMode ? 'text-slate-300' : 'text-slate-700'}>
+                            {item.quantity}x {item.name}
+                          </span>
+                          <span className="font-semibold">${item.price.toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className={`mt-4 pt-4 border-t space-y-1 ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                      <div className="flex justify-between text-sm">
+                        <span className={darkMode ? 'text-slate-400' : 'text-slate-600'}>Shipping Address:</span>
+                        <span className={`font-medium ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{order.shippingAddress}</span>
+                      </div>
+                      {order.estimatedDelivery && (
+                        <div className="flex justify-between text-sm">
+                          <span className={darkMode ? 'text-slate-400' : 'text-slate-600'}>Estimated Delivery:</span>
+                          <span className={`font-medium ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{order.estimatedDelivery}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inventory Management Tab */}
+      {activeTab === 'inventory' && (
+        <div className="space-y-6">
+          <div className={`p-6 rounded-2xl border ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'}`}>
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Box className="w-5 h-5 text-amber-400" />
+              Stock Management - Adjust Levels
+            </h3>
+            <div className="space-y-3">
+              {lowStockProducts.map((product) => (
+                <div key={product.id} className={`p-5 rounded-xl border ${darkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="font-bold text-lg mb-1">{product.name}</div>
+                      <div className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                        Product ID: {product.id}
+                      </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                          product.stock < 3 ? 'bg-rose-500/20 text-rose-400' :
+                          product.stock < 5 ? 'bg-amber-500/20 text-amber-400' :
+                          'bg-emerald-500/20 text-emerald-400'
+                        }`}>
+                          {product.stock < 3 ? 'Critical' : product.stock < 5 ? 'Low' : 'Normal'} Stock
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm text-slate-400 mb-2">Current Stock</div>
+                      <div className="text-4xl font-black text-cyan-400 mb-3">{product.stock}</div>
+                      <div className="flex items-center gap-2">
+                        <button className="px-4 py-2 bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                          <TrendingDown className="w-4 h-4" />
+                          Remove
+                        </button>
+                        <button className="px-4 py-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                          <TrendingUp className="w-4 h-4" />
+                          Add
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`pt-3 border-t ${darkMode ? 'border-slate-700' : 'border-slate-200'} text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                    Reorder threshold: {product.threshold} units • You can adjust stock levels but cannot purchase new inventory
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Permission Note */}
+          <div className={`p-4 rounded-xl border ${darkMode ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-200'}`}>
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <div className="font-semibold text-amber-400 mb-1">Inventory Management Permission</div>
+                <div className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  ✅ You can: Add products, edit products, adjust stock levels (add/remove from existing stock)<br />
+                  ❌ You cannot: Purchase new inventory from suppliers - This requires Store Owner authorization
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,23 +4,37 @@ import {
   Trash2, Sliders, Zap, ShieldCheck, Truck, RotateCcw, MessageSquare,
   ArrowRight, CreditCard, Lock, Check, ChevronRight, Cpu, AlertTriangle,
   CheckCircle, Sparkles, Mail, Phone, MapPin, Globe, Linkedin, Github,
-  Twitter, Facebook, Instagram, User, LogOut, Wifi, WifiOff
+  Twitter, Facebook, Instagram, User, LogOut, Wifi, WifiOff, Bot
 } from 'lucide-react';
 import { PRODUCTS_DATA, CATEGORIES } from './data/products';
 import { useAuth } from './context/AuthContext';
+import { useLanguage } from './context/LanguageContext';
 import Login from './components/Login';
 import CustomerDashboard from './components/CustomerDashboard';
 import ManagerDashboard from './components/ManagerDashboard';
 import OwnerDashboard from './components/OwnerDashboard';
 import ToastNotification from './components/ToastNotification';
+import AIAssistant from './components/AIAssistant';
+import LanguageSelector from './components/LanguageSelector';
+import ThemeToggle from './components/ThemeToggle';
 import useNetworkMonitor from './hooks/useNetworkMonitor';
+import useAutoTheme from './hooks/useAutoTheme';
 
 export default function App() {
-  // Theme state
-  const [darkMode, setDarkMode] = useState(true);
+  // Language hook
+  const { t } = useLanguage();
+  
+  // Auto theme hook
+  const { isDarkMode, isAutoMode, toggleTheme, toggleAutoMode, timePeriod, themeMessage, isNightTime } = useAutoTheme();
+  
+  // Use auto theme instead of manual state
+  const darkMode = isDarkMode;
   
   // Product state - now managed locally to allow adding products
   const [products, setProducts] = useState(PRODUCTS_DATA);
+  
+  // Featured product slideshow state
+  const [featuredIndex, setFeaturedIndex] = useState(0);
   
   // Product filtering
   const [activeCategory, setActiveCategory] = useState('All Categories');
@@ -42,12 +56,8 @@ export default function App() {
   const [discountPercent, setDiscountPercent] = useState(0);
   const [promoError, setPromoError] = useState('');
   
-  // Chat state
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState([
-    { sender: 'bot', text: 'Hello! 👋 Welcome to TechMart Support. How can I help you today?' }
-  ]);
-  const [chatInput, setChatInput] = useState('');
+  // Chat state - REMOVED (replaced by AI Assistant)
+  const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
   
   // About modal state
   const [isAboutOpen, setIsAboutOpen] = useState(false);
@@ -132,6 +142,15 @@ export default function App() {
   const networkStatus = useNetworkMonitor((status) => {
     showAdvancedNotification(status);
   });
+
+  // Auto-rotate featured products every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFeaturedIndex((prev) => (prev + 1) % Math.min(products.length, 10));
+    }, 5000); // Change every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [products.length]);
 
   // Apply dark mode class to document
   useEffect(() => {
@@ -261,28 +280,6 @@ export default function App() {
     }
   };
 
-  const handleChatSend = (e) => {
-    e.preventDefault();
-    if (!chatInput.trim()) return;
-    
-    const newMsg = { sender: 'user', text: chatInput };
-    setChatMessages((prev) => [...prev, newMsg]);
-    const userText = chatInput;
-    setChatInput('');
-    
-    setTimeout(() => {
-      let botResponse = "Thanks for your message! Our support team is here to help.";
-      if (userText.toLowerCase().includes('shipping')) {
-        botResponse = "We offer Free Express Shipping on all orders over $150!";
-      } else if (userText.toLowerCase().includes('return')) {
-        botResponse = "We have a 30-day easy return policy on all products.";
-      } else if (userText.toLowerCase().includes('warranty')) {
-        botResponse = "All products come with manufacturer warranty. Check product details for specific terms.";
-      }
-      setChatMessages((prev) => [...prev, { sender: 'bot', text: botResponse }]);
-    }, 800);
-  };
-
   return (
     <div className={`min-h-screen font-sans transition-colors duration-300 ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       {/* Toast Notification System */}
@@ -389,14 +386,15 @@ export default function App() {
               About
             </button>
             
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className={`p-2.5 rounded-xl border transition ${
-                darkMode ? 'border-slate-800 hover:bg-slate-800 text-amber-400' : 'border-slate-200 hover:bg-slate-100 text-slate-700'
-              }`}
-            >
-              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
+            <ThemeToggle 
+              isDarkMode={isDarkMode}
+              isAutoMode={isAutoMode}
+              toggleTheme={toggleTheme}
+              toggleAutoMode={toggleAutoMode}
+              timePeriod={timePeriod}
+              themeMessage={themeMessage}
+              darkMode={darkMode}
+            />
 
             <button
               onClick={() => alert(`Wishlist contains ${wishlist.length} item(s).`)}
@@ -480,25 +478,104 @@ export default function App() {
               </div>
             </div>
 
-            {/* Featured Product */}
+            {/* Featured Product - Anime Style */}
             <div className="lg:col-span-5">
-              <div className="relative group rounded-2xl bg-gradient-to-b from-slate-800/80 to-slate-900 border border-slate-700/80 p-5 shadow-2xl">
-                <div className="absolute -top-3 -right-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
-                  <Zap className="w-3 h-3" /> Featured
+              <div className="relative group rounded-3xl bg-gradient-to-br from-purple-900/40 via-pink-900/40 to-blue-900/40 border-2 border-pink-500/50 p-6 shadow-2xl backdrop-blur-sm overflow-hidden">
+                {/* Animated Background Effects */}
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-cyan-500/10 animate-pulse"></div>
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-pink-500/30 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-cyan-500/30 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+                
+                {/* Sparkle Effects */}
+                <div className="absolute top-4 right-4 w-2 h-2 bg-yellow-400 rounded-full animate-ping"></div>
+                <div className="absolute top-8 right-12 w-1 h-1 bg-pink-400 rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
+                <div className="absolute top-12 right-6 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
+                
+                {/* Featured Badge - Anime Style */}
+                <div className="absolute -top-3 -right-3 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white text-xs font-black px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5 animate-bounce border-2 border-white/50">
+                  <Sparkles className="w-4 h-4 animate-spin" style={{animationDuration: '3s'}} />
+                  <span className="tracking-wider">✨ FEATURED ✨</span>
                 </div>
-                <div className="relative h-60 rounded-xl overflow-hidden mb-4 bg-slate-950">
-                  <img src={products[0].image} alt={products[0].name} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                
+                <div className="relative h-64 rounded-2xl overflow-hidden mb-4 border-4 border-gradient shadow-inner">
+                  {/* Anime-style border glow */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-cyan-500/20 animate-pulse"></div>
+                  
+                  {/* Product Image with anime effect */}
+                  <div className="relative w-full h-full group-hover:scale-110 transition-transform duration-700">
+                    <img 
+                      src={products[featuredIndex]?.image} 
+                      alt={products[featuredIndex]?.name} 
+                      className="w-full h-full object-cover transition-all duration-700 brightness-110 contrast-110 saturate-150" 
+                      key={featuredIndex}
+                      style={{
+                        filter: 'drop-shadow(0 0 20px rgba(236, 72, 153, 0.5))',
+                        animation: 'fadeIn 0.8s ease-in-out'
+                      }}
+                    />
+                    
+                    {/* Anime-style light streaks */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                    
+                    {/* Color overlay for anime look */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-purple-900/40 via-transparent to-pink-500/20 mix-blend-overlay"></div>
+                  </div>
+                  
+                  {/* Slideshow Indicators - Anime Style */}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-pink-500/50">
+                    {products.slice(0, 10).map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setFeaturedIndex(index)}
+                        className={`transition-all duration-300 rounded-full ${
+                          index === featuredIndex 
+                            ? 'w-8 h-3 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 shadow-lg shadow-pink-500/50' 
+                            : 'w-3 h-3 bg-slate-500 hover:bg-pink-400 hover:shadow-lg hover:shadow-pink-400/50'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  
+                  {/* Anime-style corner decorations */}
+                  <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-pink-400 rounded-tl-lg"></div>
+                  <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-cyan-400 rounded-tr-lg"></div>
+                  <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-purple-400 rounded-bl-lg"></div>
+                  <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-pink-400 rounded-br-lg"></div>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">{products[0].name}</h3>
-                <div className="flex items-center justify-between pt-3 border-t border-slate-800">
-                  <span className="text-xl font-extrabold">${products[0].price}</span>
+                
+                {/* Product Name with Anime Typography */}
+                <h3 className="relative text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 mb-3 tracking-wide drop-shadow-lg">
+                  <span className="absolute inset-0 blur-sm bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text">
+                    {products[featuredIndex]?.name}
+                  </span>
+                  <span className="relative">{products[featuredIndex]?.name}</span>
+                </h3>
+                
+                {/* Price and Button - Anime Style */}
+                <div className="flex items-center justify-between pt-4 border-t-2 border-gradient relative">
+                  <div className="relative">
+                    <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-400 to-cyan-400 drop-shadow-lg">
+                      ${products[featuredIndex]?.price}
+                    </span>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400/20 via-pink-400/20 to-cyan-400/20 blur-lg -z-10"></div>
+                  </div>
+                  
                   <button
-                    onClick={() => addToCart(products[0], 1)}
-                    className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-lg"
+                    onClick={() => addToCart(products[featuredIndex], 1)}
+                    className="relative px-6 py-3 font-black text-sm rounded-xl overflow-hidden group/btn border-2 border-pink-400 shadow-lg shadow-pink-500/50 hover:shadow-xl hover:shadow-pink-500/70 transition-all duration-300 hover:scale-105"
                   >
-                    Add to Cart
+                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 group-hover/btn:scale-110 transition-transform duration-300"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+                    <span className="relative text-white flex items-center gap-2 tracking-wider">
+                      <Sparkles className="w-4 h-4" />
+                      ADD TO CART
+                      <Zap className="w-4 h-4" />
+                    </span>
                   </button>
                 </div>
+                
+                {/* Anime-style shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 pointer-events-none"></div>
               </div>
             </div>
           </div>
@@ -1025,60 +1102,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Live Chat */}
-      <div className="fixed bottom-5 right-5 z-40">
-        {isChatOpen ? (
-          <div className={`w-80 sm:w-96 rounded-2xl border shadow-2xl overflow-hidden flex flex-col h-96 ${
-            darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-          }`}>
-            <div className="p-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" />
-                <span className="font-bold text-xs">Live Support</span>
-              </div>
-              <button onClick={() => setIsChatOpen(false)} className="hover:opacity-80">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="flex-1 p-3 overflow-y-auto space-y-3 text-xs">
-              {chatMessages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] p-2.5 rounded-xl ${
-                    msg.sender === 'user'
-                      ? 'bg-cyan-500 text-slate-950 font-medium'
-                      : darkMode ? 'bg-slate-800 border border-slate-700 text-slate-200' : 'bg-slate-100 border border-slate-300'
-                  }`}>
-                    {msg.text}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <form onSubmit={handleChatSend} className="p-2 border-t border-slate-800 flex gap-2">
-              <input
-                type="text"
-                placeholder="Type your message..."
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                className={`flex-1 p-2 text-xs rounded-lg border outline-none ${
-                  darkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'
-                }`}
-              />
-              <button type="submit" className="px-3 py-2 bg-cyan-500 text-slate-950 font-bold text-xs rounded-lg hover:bg-cyan-400">
-                Send
-              </button>
-            </form>
-          </div>
-        ) : (
-          <button
-            onClick={() => setIsChatOpen(true)}
-            className="p-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-full shadow-2xl flex items-center gap-2 font-bold text-xs hover:scale-105 transition"
-          >
-            <MessageSquare className="w-5 h-5" />
-            <span className="hidden sm:inline">Support</span>
-          </button>
-        )}
-      </div>
-
       {/* Dashboard / Login Modal */}
       {isLoginOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn overflow-y-auto">
@@ -1399,6 +1422,43 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* AI Assistant Floating Button */}
+      <button
+        onClick={() => setIsAIAssistantOpen(true)}
+        className={`fixed bottom-6 right-6 z-40 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 group ${
+          darkMode ? 'bg-gradient-to-br from-purple-500 to-blue-600' : 'bg-gradient-to-br from-purple-500 to-blue-600'
+        }`}
+        aria-label="Open AI Assistant"
+      >
+        {/* Pulse Animation Ring */}
+        <div className="absolute inset-0 rounded-full bg-purple-400 animate-ping opacity-20"></div>
+        
+        {/* Bot Icon */}
+        <Bot className="w-8 h-8 text-white relative z-10" />
+        
+        {/* Sparkle Effect */}
+        <Sparkles className="w-4 h-4 text-yellow-300 absolute -top-1 -right-1 animate-pulse" />
+        
+        {/* Tooltip */}
+        <div className={`absolute right-full mr-3 px-4 py-2 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none ${
+          darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-900 shadow-lg'
+        }`}>
+          <div className="text-xs font-semibold">AI Shopping Assistant</div>
+          <div className="text-[10px] text-slate-400">Ask me anything!</div>
+        </div>
+      </button>
+
+      {/* AI Assistant Modal */}
+      {isAIAssistantOpen && (
+        <AIAssistant
+          darkMode={darkMode}
+          products={products}
+          orders={orders}
+          user={user}
+          onClose={() => setIsAIAssistantOpen(false)}
+        />
       )}
 
       {/* Footer */}

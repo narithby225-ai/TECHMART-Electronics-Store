@@ -26,21 +26,30 @@ export const PERMISSIONS = {
   VIEW_OWN_ORDERS: 'view_own_orders',
   MANAGE_WISHLIST: 'manage_wishlist',
   
-  // Manager permissions
+  // Store Manager permissions
+  VIEW_INCOME_EXPENSE: 'view_income_expense', // View income/expense lists
+  VIEW_RECORDS: 'view_records', // View all records
+  VIEW_CUSTOMER_INVOICES: 'view_customer_invoices', // View customer purchase invoices
   VIEW_ALL_ORDERS: 'view_all_orders',
   UPDATE_ORDER_STATUS: 'update_order_status',
   VIEW_INVENTORY: 'view_inventory',
-  UPDATE_INVENTORY: 'update_inventory',
-  VIEW_CUSTOMERS: 'view_customers',
+  UPDATE_INVENTORY: 'update_inventory', // Adjust stock levels
   ADD_PRODUCTS: 'add_products',
   EDIT_PRODUCTS: 'edit_products',
+  VIEW_CUSTOMERS: 'view_customers',
   
-  // Owner permissions
+  // Store Owner permissions (Full access except inventory purchase)
   MANAGE_PRODUCTS: 'manage_products',
+  DELETE_PRODUCTS: 'delete_products',
   MANAGE_USERS: 'manage_users',
   VIEW_ANALYTICS: 'view_analytics',
+  VIEW_REVENUE_REPORTS: 'view_revenue_reports',
   MANAGE_SETTINGS: 'manage_settings',
-  FULL_ACCESS: 'full_access'
+  MANAGE_PROMOTIONS: 'manage_promotions',
+  FULL_ACCESS: 'full_access',
+  
+  // Explicitly forbidden permissions
+  PURCHASE_INVENTORY: 'purchase_inventory' // Neither Manager nor Owner can do this
 };
 
 // Role-based permissions mapping
@@ -53,27 +62,53 @@ const rolePermissions = {
     PERMISSIONS.MANAGE_WISHLIST
   ],
   [USER_ROLES.MANAGER]: [
+    // View permissions
     PERMISSIONS.VIEW_PRODUCTS,
+    PERMISSIONS.VIEW_INCOME_EXPENSE,
+    PERMISSIONS.VIEW_RECORDS,
+    PERMISSIONS.VIEW_CUSTOMER_INVOICES,
     PERMISSIONS.VIEW_ALL_ORDERS,
-    PERMISSIONS.UPDATE_ORDER_STATUS,
     PERMISSIONS.VIEW_INVENTORY,
-    PERMISSIONS.UPDATE_INVENTORY,
     PERMISSIONS.VIEW_CUSTOMERS,
+    
+    // Management permissions
+    PERMISSIONS.UPDATE_ORDER_STATUS,
+    PERMISSIONS.UPDATE_INVENTORY, // Can adjust stock levels
     PERMISSIONS.ADD_PRODUCTS,
-    PERMISSIONS.EDIT_PRODUCTS
+    PERMISSIONS.EDIT_PRODUCTS,
+    
+    // Explicitly CANNOT:
+    // - PURCHASE_INVENTORY
+    // - DELETE_PRODUCTS
+    // - MANAGE_USERS
+    // - MANAGE_SETTINGS
+    // - VIEW_ANALYTICS
   ],
   [USER_ROLES.OWNER]: [
+    // Full access to everything except purchasing inventory
     PERMISSIONS.FULL_ACCESS,
+    PERMISSIONS.VIEW_PRODUCTS,
+    PERMISSIONS.VIEW_INCOME_EXPENSE,
+    PERMISSIONS.VIEW_RECORDS,
+    PERMISSIONS.VIEW_CUSTOMER_INVOICES,
+    PERMISSIONS.VIEW_ALL_ORDERS,
+    PERMISSIONS.VIEW_INVENTORY,
+    PERMISSIONS.VIEW_CUSTOMERS,
+    PERMISSIONS.VIEW_ANALYTICS,
+    PERMISSIONS.VIEW_REVENUE_REPORTS,
+    
+    PERMISSIONS.UPDATE_ORDER_STATUS,
+    PERMISSIONS.UPDATE_INVENTORY,
+    PERMISSIONS.ADD_PRODUCTS,
+    PERMISSIONS.EDIT_PRODUCTS,
+    PERMISSIONS.DELETE_PRODUCTS,
     PERMISSIONS.MANAGE_PRODUCTS,
     PERMISSIONS.MANAGE_USERS,
-    PERMISSIONS.VIEW_ANALYTICS,
     PERMISSIONS.MANAGE_SETTINGS,
-    PERMISSIONS.VIEW_ALL_ORDERS,
-    PERMISSIONS.UPDATE_ORDER_STATUS,
-    PERMISSIONS.VIEW_INVENTORY,
-    PERMISSIONS.UPDATE_INVENTORY,
-    PERMISSIONS.VIEW_CUSTOMERS,
-    PERMISSIONS.VIEW_PRODUCTS
+    PERMISSIONS.MANAGE_PROMOTIONS,
+    
+    // Explicitly CANNOT:
+    // - PURCHASE_INVENTORY (Owner also cannot purchase inventory)
   ]
 };
 
